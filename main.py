@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from flask import request, jsonify
 
 app = Flask(__name__)
@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def main():
-    return "<h1>Welcome to the Machine Learning Module</h1>"
+    return render_template('index.html')
 
 
 @app.route("/question")
