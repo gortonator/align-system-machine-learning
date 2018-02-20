@@ -10,6 +10,7 @@ username = raw_input('Enter your email username: ')
 password = getpass.getpass(prompt='Enter your email password: ')
 app = Flask(__name__)
 
+
 @app.route("/")
 def main():
     return render_template('index.html')
