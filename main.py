@@ -1,10 +1,11 @@
 from flask import Flask, render_template
 from flask import request, jsonify
-import requests
-import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+
 import getpass
+import requests
+import smtplib
 
 username = raw_input('Enter your email username: ')
 password = getpass.getpass(prompt='Enter your email password: ')
