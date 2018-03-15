@@ -2,13 +2,40 @@ from flask import Flask, render_template
 from flask import request, jsonify
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from queue import Queue
 
 import getpass
 import requests
 import smtplib
+import json
+import threading
 
-username = raw_input('Enter your email username: ')
-password = getpass.getpass(prompt='Enter your email password: ')
+
+class EmailListener(threading.Thread):
+    def __init__(self, queue):
+        threading.Thread.__init__(self)
+        self.queue = queue
+
+    def run(self):
+        while True:
+            if not self.queue.empty():
+                question = self.queue.get()
+                send_email(question)
+                self.queue.task_done()
+
+
+print "Loading configurations..."
+with open('config.json') as json_data_file:
+    cfg = json.load(json_data_file)
+
+username = cfg['email']['username']
+password = getpass.getpass(prompt='Enter your email password for: ' + username + ' ')
+print "Initializing Email Listener..."
+email_queue = Queue()
+email_worker = EmailListener(email_queue)
+email_worker.setDaemon(True)
+email_worker.start()
+print "Listener established!"
 app = Flask(__name__)
 
 
@@ -23,15 +50,20 @@ def invoke_question():
     payload = get_answer(query)
     query_decision = payload['result']['action']
     if query_decision == "input.unknown":
-        send_email(query)
+        email_queue.put(query)
+        email_queue.join()
     answer = {"question": query, "answer": payload['result']['fulfillment']['speech']}
     return jsonify(answer)
 
 
 def get_answer(question):
-    key = "e63d08b802e841ecb87a8b3bc6c5976a"
+    key = cfg['dialogflow']['key']
     header = {'Authorization': 'Bearer ' + key}
-    url = "https://api.dialogflow.com/v1/query?v=20150910&sessionId=12345&lang=en&query=" + question
+    url = "https://api.dialogflow.com/v1/query?"
+    url += "v=" + cfg['dialogflow']['id']
+    url += "&sessionId=" + cfg['dialogflow']['session']
+    url += "&lang=" + cfg['dialogflow']['lang']
+    url += "&query=" + question
     req = requests.get(url, headers=header)
     return req.json()
 
@@ -49,3 +81,4 @@ def send_email(question):
     msg.attach(MIMEText(text, 'plain'))
     s.sendmail(username, username, msg.as_string())
     s.quit()
+
