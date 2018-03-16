@@ -1,5 +1,5 @@
 from flask import Flask, render_template
-from flask import request, jsonify
+from flask import request, jsonify, make_response
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from queue import Queue
@@ -9,6 +9,7 @@ import requests
 import smtplib
 import json
 import threading
+import statistics
 
 
 class EmailListener(threading.Thread):
@@ -36,6 +37,12 @@ email_worker = EmailListener(email_queue)
 email_worker.setDaemon(True)
 email_worker.start()
 print "Listener established!"
+print "Loading answer constants..."
+statistics.answer_slot_config(False)
+print "Load successful!"
+statistics.get_student_count()
+
+
 app = Flask(__name__)
 
 
@@ -66,6 +73,44 @@ def get_answer(question):
     url += "&query=" + question
     req = requests.get(url, headers=header)
     return req.json()
+
+
+@app.route("/api/intents")
+def get_intents():
+    key = cfg['dialogflow']['dev_key']
+    header = {'Authorization': 'Bearer ' + key,
+              'content-type': 'application/json'}
+    url = "https://api.dialogflow.com/v1/intents?"
+    url += "v=" + cfg['dialogflow']['id']
+    url += "&lang=" + cfg['dialogflow']['lang']
+    req = requests.get(url, headers=header)
+    res = req.json()
+    res_list = []
+    for entry in res:
+        res_list.append({'id': entry['id'], "name": entry['name']})
+    statistics.answer_slot_config()
+    return jsonify(str(res_list))
+
+
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    # Get request parameters
+    req = request.get_json(silent=True, force=True)
+
+    print "REQUEST \n" + json.dumps(req, indent=4, sort_keys=True)
+
+    # Get the parameters for the translation
+    text = req['result']['parameters'].get('text')
+
+    # Fulfill the translation and get a response
+    output = "Output Test: " + text
+
+    # Compose the response to API.AI
+    res = {'speech': output,
+           'displayText': output,
+           'contextOut': req['result']['contexts']}
+
+    return make_response(jsonify(res))
 
 
 def send_email(question):

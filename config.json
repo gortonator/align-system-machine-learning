@@ -2,6 +2,7 @@
     "dialogflow":{
         "id": "20150910",
         "key": "e63d08b802e841ecb87a8b3bc6c5976a",
+        "dev_key": "552925a21bf243e386fa406dd10c8b59",
         "session": "12345",
         "lang": "en"
     },
