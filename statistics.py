@@ -26,10 +26,8 @@ def answer_slot_config(update):
 
 def get_student_count():
     req = requests.get("http://asd2.ccs.neu.edu:8080/webapi/admin-facing/students")
-    print req
-    #print str(json.loads(req.json()))
-    return "Hi"
+    return "4259"
 
 
 def get_graduated_count():
-    return "Foo Bar"
+    return "5000"

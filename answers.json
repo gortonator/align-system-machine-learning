@@ -1,10 +1,10 @@
 {
     "student_count": {
         "fn": "get_student_count", 
-        "value": "Hi"
+        "value": "4259"
     }, 
     "student_count_graduated": {
         "fn": "get_graduated_count", 
-        "value": "Foo Bar"
+        "value": "5000"
     }
 }

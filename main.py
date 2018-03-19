@@ -40,7 +40,6 @@ print "Listener established!"
 print "Loading answer constants..."
 statistics.answer_slot_config(False)
 print "Load successful!"
-statistics.get_student_count()
 
 
 app = Flask(__name__)
@@ -94,21 +93,13 @@ def get_intents():
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
-    # Get request parameters
     req = request.get_json(silent=True, force=True)
-
     print "REQUEST \n" + json.dumps(req, indent=4, sort_keys=True)
 
-    # Get the parameters for the translation
-    text = req['result']['parameters'].get('text')
+    text = req['result']['fulfillment'].get('speech')
+    resolved_text = resolve(text)
 
-    # Fulfill the translation and get a response
-    output = "Output Test: " + text
-
-    # Compose the response to API.AI
-    res = {'speech': output,
-           'displayText': output,
-           'contextOut': req['result']['contexts']}
+    res = { 'speech': resolved_text, 'displayText': resolved_text }
 
     return make_response(jsonify(res))
 
@@ -126,4 +117,17 @@ def send_email(question):
     msg.attach(MIMEText(text, 'plain'))
     s.sendmail(username, username, msg.as_string())
     s.quit()
+
+
+def resolve(answer):
+    with open('answers.json') as json_file:
+        stats = json.load(json_file)
+    words = answer.split(" ")
+    fulfilled_ans = answer
+    for word in words:
+        size = len(word)
+        if word[0] == '#' and word[size - 1] == '#':
+            constant = stats[word[1:size - 1]]['value']
+            fulfilled_ans = fulfilled_ans.replace(word, constant)
+    return fulfilled_ans
 
