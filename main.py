@@ -20,6 +20,7 @@ print "Initializing Email Listener..."
 print "Listener established!"
 print "Loading answer constants..."
 statistics.answer_slot_config(False)
+fallback_table = {}
 print "Load successful!"
 
 
@@ -77,14 +78,34 @@ def webhook():
     print "REQUEST \n" + json.dumps(req, indent=4, sort_keys=True)
 
     text = req['result']['fulfillment'].get('speech')
-    resolved_text = resolve(text)
 
-    res = {'speech': resolved_text, 'displayText': resolved_text }
+    if "input.unknown" in req['result']['action']:
+        resolved_text = handle_fallback(req)
+    else:
+        resolved_text = resolve(text)
+
+    res = {'speech': resolved_text, 'displayText': resolved_text}
 
     return make_response(jsonify(res))
 
 
-def send_email(question):
+def handle_fallback(payload):
+    response_text = payload['result']['fulfillment'].get('speech')
+    action_res = payload['result']['action']
+    if action_res == "input.unknown":
+        fallback_table[payload['sessionId']] = payload['result']['resolvedQuery']
+    elif action_res == "input.unknown.yes":
+        addr = payload['result']['parameters'].get('email')
+        send_email(fallback_table[payload['sessionId']], addr)
+        fallback_table.pop(payload['sessionId'])
+    elif action_res == "input.unknown.no":
+        fallback_table.pop(payload['sessionId'])
+    else:
+        pass
+    return response_text
+
+
+def send_email(question, send_to):
     s = smtplib.SMTP('smtp.gmail.com', 587)
     s.starttls()
     s.login(username, password)
@@ -92,8 +113,10 @@ def send_email(question):
     msg = MIMEMultipart()
     msg['Subject'] = "You have a new unanswered question!"
     msg['From'] = username
-    msg['To'] = username
-    text = "You have a question to answer: \n\n" + question
+    msg['To'] = cfg['email']['recipient']
+    text = "You have a question to answer:\n\n"
+    text += "Question: " + question + "\n"
+    text += "Reply question to: " + send_to
     msg.attach(MIMEText(text, 'plain'))
     s.sendmail(username, username, msg.as_string())
     s.quit()
