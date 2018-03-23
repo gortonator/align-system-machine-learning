@@ -2,27 +2,12 @@ from flask import Flask, render_template
 from flask import request, jsonify, make_response
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from queue import Queue
 
 import getpass
 import requests
 import smtplib
 import json
-import threading
 import statistics
-
-
-class EmailListener(threading.Thread):
-    def __init__(self, queue):
-        threading.Thread.__init__(self)
-        self.queue = queue
-
-    def run(self):
-        while True:
-            if not self.queue.empty():
-                question = self.queue.get()
-                send_email(question)
-                self.queue.task_done()
 
 
 print "Loading configurations..."
@@ -32,10 +17,6 @@ with open('config.json') as json_data_file:
 username = cfg['email']['username']
 password = getpass.getpass(prompt='Enter your email password for: ' + username + ' ')
 print "Initializing Email Listener..."
-email_queue = Queue()
-email_worker = EmailListener(email_queue)
-email_worker.setDaemon(True)
-email_worker.start()
 print "Listener established!"
 print "Loading answer constants..."
 statistics.answer_slot_config(False)
@@ -56,8 +37,7 @@ def invoke_question():
     payload = get_answer(query)
     query_decision = payload['result']['action']
     if query_decision == "input.unknown":
-        email_queue.put(query)
-        email_queue.join()
+        send_email(query)
     answer = {"question": query, "answer": payload['result']['fulfillment']['speech']}
     return jsonify(answer)
 
@@ -99,7 +79,7 @@ def webhook():
     text = req['result']['fulfillment'].get('speech')
     resolved_text = resolve(text)
 
-    res = { 'speech': resolved_text, 'displayText': resolved_text }
+    res = {'speech': resolved_text, 'displayText': resolved_text }
 
     return make_response(jsonify(res))
 

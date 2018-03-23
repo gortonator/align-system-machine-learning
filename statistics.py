@@ -3,13 +3,12 @@ import os
 import json
 
 
-def answer_slot_config(update):
+def answer_slot_config(update=False):
     if not(os.path.exists("answers.json")):
         empty_config = {}
         with open('answers.json', 'w') as f:
             json.dump(empty_config, f)
     else:
-        stats = {}
         with open('answers.json') as json_file:
             stats = json.load(json_file)
             for key, value in stats.iteritems():
@@ -25,7 +24,7 @@ def answer_slot_config(update):
 
 
 def get_student_count():
-    req = requests.get("http://asd2.ccs.neu.edu:8080/webapi/admin-facing/students")
+    #req = requests.get("http://asd2.ccs.neu.edu:8080/webapi/admin-facing/students")
     return "4259"
 
 
