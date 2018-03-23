@@ -1,11 +1,7 @@
 from flask import Flask, render_template
 from flask import request, jsonify, make_response
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
-import getpass
 import requests
-import smtplib
 import json
 import statistics
 
@@ -14,13 +10,8 @@ print "Loading configurations..."
 with open('config.json') as json_data_file:
     cfg = json.load(json_data_file)
 
-username = cfg['email']['username']
-password = getpass.getpass(prompt='Enter your email password for: ' + username + ' ')
-print "Initializing Email Listener..."
-print "Listener established!"
 print "Loading answer constants..."
 statistics.answer_slot_config(False)
-fallback_table = {}
 print "Load successful!"
 
 
@@ -36,9 +27,6 @@ def main():
 def invoke_question():
     query = request.args.get('query', 'Basic Question', type=str)
     payload = get_answer(query)
-    query_decision = payload['result']['action']
-    if query_decision == "input.unknown":
-        send_email(query)
     answer = {"question": query, "answer": payload['result']['fulfillment']['speech']}
     return jsonify(answer)
 
@@ -79,47 +67,11 @@ def webhook():
 
     text = req['result']['fulfillment'].get('speech')
 
-    if "input.unknown" in req['result']['action']:
-        resolved_text = handle_fallback(req)
-    else:
-        resolved_text = resolve(text)
+    resolved_text = resolve(text)
 
     res = {'speech': resolved_text, 'displayText': resolved_text}
 
     return make_response(jsonify(res))
-
-
-def handle_fallback(payload):
-    response_text = payload['result']['fulfillment'].get('speech')
-    action_res = payload['result']['action']
-    if action_res == "input.unknown":
-        fallback_table[payload['sessionId']] = payload['result']['resolvedQuery']
-    elif action_res == "input.unknown.yes":
-        addr = payload['result']['parameters'].get('email')
-        send_email(fallback_table[payload['sessionId']], addr)
-        fallback_table.pop(payload['sessionId'])
-    elif action_res == "input.unknown.no":
-        fallback_table.pop(payload['sessionId'])
-    else:
-        pass
-    return response_text
-
-
-def send_email(question, send_to):
-    s = smtplib.SMTP('smtp.gmail.com', 587)
-    s.starttls()
-    s.login(username, password)
-
-    msg = MIMEMultipart()
-    msg['Subject'] = "You have a new unanswered question!"
-    msg['From'] = username
-    msg['To'] = cfg['email']['recipient']
-    text = "You have a question to answer:\n\n"
-    text += "Question: " + question + "\n"
-    text += "Reply question to: " + send_to
-    msg.attach(MIMEText(text, 'plain'))
-    s.sendmail(username, username, msg.as_string())
-    s.quit()
 
 
 def resolve(answer):
@@ -133,4 +85,3 @@ def resolve(answer):
             constant = stats[word[1:size - 1]]['value']
             fulfilled_ans = fulfilled_ans.replace(word, constant)
     return fulfilled_ans
-

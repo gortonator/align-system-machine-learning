@@ -1,4 +1,3 @@
-import requests
 import os
 import json
 
@@ -24,7 +23,6 @@ def answer_slot_config(update=False):
 
 
 def get_student_count():
-    #req = requests.get("http://asd2.ccs.neu.edu:8080/webapi/admin-facing/students")
     return "4259"
 
 
