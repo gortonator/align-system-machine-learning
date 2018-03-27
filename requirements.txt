@@ -19,7 +19,6 @@ ipaddress==1.0.19
 isort==4.3.4
 itsdangerous==0.24
 jedi==0.11.0
-jep==3.7.0
 Jinja2==2.10
 json-rpc==1.10.8
 lazy-object-proxy==1.3.1
