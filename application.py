@@ -13,14 +13,15 @@ with open('config.json') as json_data_file:
 print "Loading answer constants..."
 statistics.answer_slot_config(False)
 print "Load successful!"
-app = Flask(__name__)
+application = Flask(__name__)
 
-@app.route("/")
+
+@application.route("/")
 def main():
     return render_template('index.html')
 
 
-@app.route("/api")
+@application.route("/api")
 def invoke_question():
     query = request.args.get('query', 'Basic Question', type=str)
     payload = get_answer(query)
@@ -40,7 +41,7 @@ def get_answer(question):
     return req.json()
 
 
-@app.route("/api/intents")
+@application.route("/api/intents")
 def get_intents():
     key = cfg['dialogflow']['dev_key']
     header = {'Authorization': 'Bearer ' + key,
@@ -57,7 +58,7 @@ def get_intents():
     return jsonify(str(res_list))
 
 
-@app.route('/webhook', methods=['POST'])
+@application.route('/webhook', methods=['POST'])
 def webhook():
     req = request.get_json(silent=True, force=True)
     print "REQUEST \n" + json.dumps(req, indent=4, sort_keys=True)
@@ -85,4 +86,4 @@ def resolve(answer):
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0')
+    application.run(host='0.0.0.0')
