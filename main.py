@@ -13,13 +13,7 @@ with open('config.json') as json_data_file:
 print "Loading answer constants..."
 statistics.answer_slot_config(False)
 print "Load successful!"
-
-
 app = Flask(__name__)
-
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000, debug=True)
-
 
 @app.route("/")
 def main():
@@ -88,3 +82,7 @@ def resolve(answer):
             constant = stats[word[1:size - 1]]['value']
             fulfilled_ans = fulfilled_ans.replace(word, constant)
     return fulfilled_ans
+
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0')
