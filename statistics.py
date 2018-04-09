@@ -1,61 +1,103 @@
+"""
+    A component of the web hook which pre-loads all dynamic data
+    into a dictionary in memory for fast recall.
+    Additional functions to get other statistics must
+    have the values implemented in the REDIS cache first
+    Then provide the proper function in the answers.json
+    file to resolve for a particular value
+    AUTHOR: Nicholas Carugati
+"""
 import os
 import json
-import requests
 import traceback
+import requests
 
-host = "http://35.185.57.14"
-port_host = "15000"
+HOST = "http://35.185.57.14"
+PORT_HOST = "15000"
 with open('config.json') as json_data_file:
-    cfg = json.load(json_data_file)
+    CFG = json.load(json_data_file)
 
 
 def answer_slot_config(update=False):
-    if not(os.path.exists("answers.json")):
+    """ Reads and parses the JSON from the answers file
+        This routine can change the values periodically if chosen
+
+        update -- if the pre-loader should update the answer values
+        regardless if the answer is present (default False)
+    """
+
+    if not os.path.exists("answers.json"):
         empty_config = {}
-        with open('answers.json', 'w') as f:
-            json.dump(empty_config, f)
+        with open('answers.json', 'w') as answer_file:
+            json.dump(empty_config, answer_file)
     else:
         with open('answers.json') as json_file:
             stats = json.load(json_file)
             for key, value in stats.iteritems():
                 try:
                     if value['value'] == "" or update:
-                        fn = globals()[value['fn']]
+                        function_resolve = globals()[value['fn']]
                         if 'params' in value:
-                            value['value'] = fn(*value['params'])
+                            value['value'] = function_resolve(*value['params'])
                         else:
-                            value['value'] = fn()
+                            value['value'] = function_resolve()
 
                 except TypeError:
                     print key + " Not a valid method"
                     traceback.print_stack()
                     return
-        with open('answers.json', 'w') as f:
-            json.dump(stats, f, indent=4, sort_keys=True)
+        with open('answers.json', 'w') as answer_file:
+            json.dump(stats, answer_file, indent=4, sort_keys=True)
 
 
 def get_student_count():
-    req = requests.get(host + ":" + port_host + "/stats/student-numbers")
+    """ Retrieves the amount of students in the ALIGN program from the REDIS cache
+        This routine can change the values periodically
+
+        RETURN: The overall amount of students in the ALIGN program
+    """
+
+    req = requests.get(HOST + ":" + PORT_HOST + "/stats/student-numbers")
     total = 0
     count_tuple = req.json()
-    for key, value in count_tuple.iteritems():
+    for value in count_tuple.itervalues():
         total += int(value)
     return str(total)
 
 
 def get_student_count_graduated():
-    req = requests.get(host + ":" + port_host + "/stats/num-graduates")
+    """ Retrieves the amount of students in the ALIGN program from the REDIS cache that graduated
+        This routine can change the values periodically
+
+        RETURN: The overall amount of students in the ALIGN program that graduated
+    """
+
+    req = requests.get(HOST + ":" + PORT_HOST + "/stats/num-graduates")
     count = str(req.json()['totalGraduates'])
     return count
 
 
 def get_student_count_city(city):
-    req = requests.get(host + ":" + port_host + "/stats/student-numbers")
+    """ Retrieves the amount of students in the ALIGN program
+        from the REDIS cache for a specific city
+        This routine can change the values periodically if chosen
+
+        city -- The city of choice to count the students
+        RETURN: The overall amount of students in the ALIGN program
+    """
+
+    req = requests.get(HOST + ":" + PORT_HOST + "/stats/student-numbers")
     return str(req.json()[city])
 
 
 def get_top_bachelors(max_count):
-    req = requests.get(host + ":" + port_host + "/stats/backgrounds/top?k=" + str(max_count))
+    """ Retrieves the top 10 bachelors degrees for all students in the program
+        This routine can change the values periodically if chosen
+
+        RETURN: The top 5 bachelor degrees in the program in a readable string
+    """
+
+    req = requests.get(HOST + ":" + PORT_HOST + "/stats/backgrounds/top?k=" + str(max_count))
     bachelors = req.json()['backgrounds']
     if len(bachelors) == 1:
         return bachelors[0]
@@ -72,7 +114,13 @@ def get_top_bachelors(max_count):
 
 
 def get_top_employers(max_count):
-    req = requests.get(host + ":" + port_host + "/stats/employers/top?k=" + str(max_count))
+    """ Retrieves the top 10 employers for all students in the program (full time)
+        This routine can change the values periodically if chosen
+
+        RETURN: The top 5 employers in the program in a readable string
+    """
+
+    req = requests.get(HOST + ":" + PORT_HOST + "/stats/employers/top?k=" + str(max_count))
     employers = req.json()['employers']
     composite = ""
     if len(employers) == 1:
