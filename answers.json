@@ -1,10 +1,52 @@
 {
     "student_count": {
         "fn": "get_student_count", 
-        "value": "4259"
+        "value": "418"
+    }, 
+    "student_count_bos": {
+        "fn": "get_student_count_city", 
+        "params": [
+            "Boston"
+        ], 
+        "value": "50"
+    }, 
+    "student_count_char": {
+        "fn": "get_student_count_city", 
+        "params": [
+            "Charlotte"
+        ], 
+        "value": "25"
     }, 
     "student_count_graduated": {
-        "fn": "get_graduated_count", 
-        "value": "5000"
+        "fn": "get_student_count_graduated", 
+        "value": "175"
+    }, 
+    "student_count_sea": {
+        "fn": "get_student_count_city", 
+        "params": [
+            "Seattle"
+        ], 
+        "value": "300"
+    }, 
+    "student_count_sil": {
+        "fn": "get_student_count_city", 
+        "params": [
+            "SiliconValley"
+        ], 
+        "value": "43"
+    }, 
+    "top_bachelors": {
+        "fn": "get_top_bachelors", 
+        "params": [
+            5
+        ], 
+        "value": "Arts, Physics, Chemistry, Criminal Justice, and Math"
+    }, 
+    "top_employers": {
+        "fn": "get_top_employers", 
+        "params": [
+            5
+        ], 
+        "value": "Zillow, Facebook, Apple, Amazon, and Google"
     }
 }

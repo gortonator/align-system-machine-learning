@@ -11,7 +11,7 @@ with open('config.json') as json_data_file:
     cfg = json.load(json_data_file)
 
 print "Loading answer constants..."
-statistics.answer_slot_config(False)
+statistics.answer_slot_config(True)
 print "Load successful!"
 application = Flask(__name__)
 
