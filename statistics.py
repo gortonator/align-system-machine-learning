@@ -12,7 +12,7 @@ import json
 import traceback
 import requests
 
-HOST = "http://35.185.57.14"
+HOST = "http://asd2.ccs.neu.edu"
 PORT_HOST = "15000"
 with open('config.json') as json_data_file:
     CFG = json.load(json_data_file)
