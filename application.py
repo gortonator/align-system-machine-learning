@@ -8,8 +8,7 @@ import statistics
 import requests
 
 
-from flask import Flask, render_template
-from flask import request, jsonify, make_response
+from flask import Flask, render_template, request, jsonify, make_response
 
 print "Loading configurations..."
 with open('config.json') as json_data_file:
@@ -128,4 +127,4 @@ def resolve(answer):
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', ssl_context=('server.crt','server.key'))
+    app.run(host='0.0.0.0')
