@@ -13,7 +13,7 @@ import traceback
 import requests
 
 HOST = "redis_client"
-PORT_HOST = "5000"
+PORT_HOST = "15000"
 with open('config.json') as json_data_file:
     CFG = json.load(json_data_file)
 
