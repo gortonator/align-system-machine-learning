@@ -13,5 +13,5 @@ threads = multiprocessing.cpu_count() * 2
 log_level = "critical"
 proc_name = "gunalignbot"
 
-keyfile="server.key"
-certificate="server.crt"
+keyfile = "server.key"
+certificate = "server.crt"
