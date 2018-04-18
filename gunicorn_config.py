@@ -14,4 +14,4 @@ log_level = "critical"
 proc_name = "gunalignbot"
 
 keyfile = "server.key"
-certificate = "server.crt"
+certfile = "server.crt"
