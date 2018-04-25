@@ -8,7 +8,7 @@ import statistics
 import requests
 
 
-from flask import Flask, render_template, request, jsonify, make_response
+from flask import Flask, request, jsonify, make_response
 
 print "Loading configurations..."
 with open('config.json') as json_data_file:
