@@ -20,15 +20,6 @@ print "Load successful!"
 app = Flask(__name__)
 
 
-@app.route("/")
-def main():
-    """
-        The main route which provides a visual shell for the bot.
-        RETURNS: The web view for the chat bot standalone shell
-    """
-    return render_template('index.html')
-
-
 @app.route("/api")
 def invoke_question():
     """
