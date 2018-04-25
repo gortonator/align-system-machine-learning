@@ -8,8 +8,7 @@ import statistics
 import requests
 
 
-from flask import Flask, render_template
-from flask import request, jsonify, make_response
+from flask import Flask, render_template, request, jsonify, make_response
 
 print "Loading configurations..."
 with open('config.json') as json_data_file:
@@ -18,10 +17,10 @@ with open('config.json') as json_data_file:
 print "Loading answer constants..."
 statistics.answer_slot_config(True)
 print "Load successful!"
-APPLICATION = Flask(__name__)
+app = Flask(__name__)
 
 
-@APPLICATION.route("/")
+@app.route("/")
 def main():
     """
         The main route which provides a visual shell for the bot.
@@ -30,7 +29,7 @@ def main():
     return render_template('index.html')
 
 
-@APPLICATION.route("/api")
+@app.route("/api")
 def invoke_question():
     """
         The endpoint which asks a question for the standalone shell
@@ -61,7 +60,7 @@ def get_answer(question):
     return req.json()
 
 
-@APPLICATION.route("/api/intents")
+@app.route("/api/intents")
 def get_intents():
     """
         A utility route which provides the list of all the bot's
@@ -85,7 +84,7 @@ def get_intents():
     return jsonify(str(res_list))
 
 
-@APPLICATION.route('/webhook', methods=['POST'])
+@app.route('/webhook', methods=['POST'])
 def webhook():
     """
         The main function of the webhook which listens for post requests
@@ -128,4 +127,4 @@ def resolve(answer):
 
 
 if __name__ == "__main__":
-    APPLICATION.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0')
