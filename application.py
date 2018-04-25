@@ -85,7 +85,6 @@ def webhook():
     """
 
     req = request.get_json(silent=True, force=True)
-    print "REQUEST \n" + json.dumps(req, indent=4, sort_keys=True)
 
     text = req['result']['fulfillment'].get('speech')
 
